@@ -6,6 +6,7 @@ import Contact from "@/components/Contact";
 import Goals from "@/components/Goals";
 
 export default function Home() {
+  const date = new Date();
   return (
     <>
       <Header />
@@ -17,7 +18,7 @@ export default function Home() {
         <Contact />
       </main>
       <footer className="p-8 text-center bg-[#000] text-[#666]">
-        <p>&copy; 2024 IronPulse Fitness. All Rights Reserved.</p>
+        <p>&copy; {date.getFullYear()} IronPulse Fitness. All Rights Reserved.</p>
       </footer>
     </>
   );

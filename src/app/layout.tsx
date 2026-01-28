@@ -26,9 +26,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${oswald.variable} ${roboto.variable} antialiased`}
-      >
+      <body className={`${oswald.variable} ${roboto.variable} antialiased`}>
+        <nav>dfsfdsf</nav>
         {children}
       </body>
     </html>
