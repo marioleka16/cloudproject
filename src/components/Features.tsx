@@ -1,7 +1,7 @@
 import React from 'react';
 
 const features = [
-  { icon: "⚡", title: "Top ", desc: "Train with industry-leading machines and free weights designed for serious results." },
+  { icon: "⚡", title: "Top", desc: "Train with industry-leading machines and free weights designed for serious results." },
   { icon: "🦾", title: "Expert Trainers", desc: "Our certified coaches are here to push your limits and guide your journey." },
   { icon: "🕒", title: "24/7 Access", desc: "Your goals don't sleep. Neither do we. Train whenever the urge strikes." },
 ];
