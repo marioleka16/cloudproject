@@ -1,4 +1,4 @@
-name: Deploy to EC2
+name: Deploy to EC2 (2 hosts)
 
 on:
   push:
@@ -13,17 +13,46 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.8.1
+    - name: Copy files to EC2_HOST_1
+      uses: appleboy/scp-action@v0.1.4
       with:
-        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+        host: ${{ secrets.EC2_HOST_1 }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "."
+        target: "/cloudproject"
 
-    - name: Deploy to EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd cloudproject
-          git pull origin main
+    - name: SSH and restart app on EC2_HOST_1
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST_1 }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /cloudproject
           npm install
           npm run build
-          pm2 reload ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
-        EOF
+          pm2 restart yourapp || pm2 start npm --name "yourapp" -- start
+          pm2 save
+
+    - name: Copy files to EC2_HOST_2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.EC2_HOST_2 }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "."
+        target: "/cloudproject"
+
+    - name: SSH and restart app on EC2_HOST_2
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST_2 }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /cloudproject
+          npm install
+          npm run build
+          pm2 restart yourapp || pm2 start npm --name "yourapp" -- start
+          pm2 save
