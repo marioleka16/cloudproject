@@ -1,4 +1,4 @@
-name: Deploy to 2 EC2 Instances
+name: Deploy to 2 EC2 Instances as root
 
 on:
   push:
@@ -20,10 +20,10 @@ jobs:
         chmod 600 ~/.ssh/id_ed25519_1
         ssh-keyscan -H ${{ secrets.EC2_HOST_1 }} >> ~/.ssh/known_hosts
 
-    - name: Deploy and restart on EC2 1
+    - name: Deploy and restart on EC2 1 as root
       run: |
-        rsync -avz --delete -e "ssh -i ~/.ssh/id_ed25519_1 -o StrictHostKeyChecking=no" ./ ec2-user@${{ secrets.EC2_HOST_1 }}:cloudproject/
-        ssh -i ~/.ssh/id_ed25519_1 ec2-user@${{ secrets.EC2_HOST_1 }} << 'EOF'
+        rsync -avz --delete -e "ssh -i ~/.ssh/id_ed25519_1 -o StrictHostKeyChecking=no" ./ root@${{ secrets.EC2_HOST_1 }}:cloudproject/
+        ssh -i ~/.ssh/id_ed25519_1 root@${{ secrets.EC2_HOST_1 }} << 'EOF'
           cd cloudproject
           npm install
           npm run build
@@ -38,10 +38,10 @@ jobs:
         chmod 600 ~/.ssh/id_ed25519_2
         ssh-keyscan -H ${{ secrets.EC2_HOST_2 }} >> ~/.ssh/known_hosts
 
-    - name: Deploy and restart on EC2 2
+    - name: Deploy and restart on EC2 2 as root
       run: |
-        rsync -avz --delete -e "ssh -i ~/.ssh/id_ed25519_2 -o StrictHostKeyChecking=no" ./ ec2-user@${{ secrets.EC2_HOST_2 }}:cloudproject/
-        ssh -i ~/.ssh/id_ed25519_2 ec2-user@${{ secrets.EC2_HOST_2 }} << 'EOF'
+        rsync -avz --delete -e "ssh -i ~/.ssh/id_ed25519_2 -o StrictHostKeyChecking=no" ./ root@${{ secrets.EC2_HOST_2 }}:cloudproject/
+        ssh -i ~/.ssh/id_ed25519_2 root@${{ secrets.EC2_HOST_2 }} << 'EOF'
           cd cloudproject
           npm install
           npm run build
