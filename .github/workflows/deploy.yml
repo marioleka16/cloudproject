@@ -1,4 +1,4 @@
-name: Deploy to 2 EC2 instances
+name: Deploy via SSH
 
 on:
   push:
@@ -13,46 +13,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Deploy to EC2_HOST_1
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_HOST_1 }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
-        target: "cloudproject"
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H ${{ secrets.EC2_HOST_1 }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.EC2_HOST_2 }} >> ~/.ssh/known_hosts
 
-    - name: Restart app on EC2_HOST_1
-      uses: appleboy/ssh-action@v0.1.7
-      with:
-        host: ${{ secrets.EC2_HOST_1 }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
+    - name: Deploy and restart on EC2_HOST_1
+      run: |
+        rsync -avz --delete ./ ec2-user@${{ secrets.EC2_HOST_1 }}:cloudproject/
+        ssh -i ~/.ssh/id_ed25519 ec2-user@${{ secrets.EC2_HOST_1 }} << 'EOF'
           cd cloudproject
           npm install
           npm run build
           pm2 restart yourapp || pm2 start npm --name "yourapp" -- start
           pm2 save
+        EOF
 
-    - name: Deploy to EC2_HOST_2
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_HOST_2 }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
-        target: "cloudproject"
-
-    - name: Restart app on EC2_HOST_2
-      uses: appleboy/ssh-action@v0.1.7
-      with:
-        host: ${{ secrets.EC2_HOST_2 }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
+    - name: Deploy and restart on EC2_HOST_2
+      run: |
+        rsync -avz --delete ./ ec2-user@${{ secrets.EC2_HOST_2 }}:cloudproject/
+        ssh -i ~/.ssh/id_ed25519 ec2-user@${{ secrets.EC2_HOST_2 }} << 'EOF'
           cd cloudproject
           npm install
           npm run build
           pm2 restart yourapp || pm2 start npm --name "yourapp" -- start
           pm2 save
+        EOF
